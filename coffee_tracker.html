@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Tracker</title>
+    <style>
+        :root {
+            --color-1: #5a6460;
+            --color-2: #48504c;
+            --color-3: #363c39;
+            --color-4: #242826;
+            --color-5: #121413;
+            --text-light: rgba(255, 255, 255, 0.9);
+            --text-dim: rgba(255, 255, 255, 0.7);
+            --glass-bg: rgba(54, 60, 57, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --accent: #78877f;
+            --accent-hover: #899e94;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--color-4), var(--color-5));
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background-attachment: fixed;
+        }
+        
+        .app-container {
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
+            padding: 28px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
+            color: var(--text-light);
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin: 12px 0;
+            color: var(--text-light);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 26px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+        }
+        
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Form styles */
+        .form-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+        
+        .day-label {
+            min-width: 90px;
+            color: var(--text-light);
+            letter-spacing: 0.5px;
+        }
+        
+        input {
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+        }
+        
+        .type-input {
+            flex-grow: 2;
+        }
+        
+        .caffeine-input {
+            width: 80px;
+            text-align: center;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        
+        /* Presets */
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+        
+        .preset-btn {
+            background: rgba(120, 135, 127, 0.2);
+            color: var(--text-light);
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            border-radius: 20px;
+            border: 1px solid rgba(120, 135, 127, 0.3);
+        }
+        
+        .preset-btn:hover {
+            background: rgba(120, 135, 127, 0.3);
+            border-color: rgba(120, 135, 127, 0.4);
+        }
+        
+        /* Entries list */
+        .entries {
+            padding-top: 10px;
+        }
+        
+        .day-entries {
+            margin-bottom: 20px;
+        }
+        
+        .day-title {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .entry-list {
+            list-style-type: none;
+        }
+        
+        .entry-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .entry-item:last-child {
+            border-bottom: none;
+        }
+        
+        .remove-btn {
+            background-color: rgba(221, 89, 76, 0.1);
+            color: rgba(255, 180, 180, 0.9);
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(221, 89, 76, 0.2);
+        }
+        
+        .remove-btn:hover {
+            background-color: rgba(221, 89, 76, 0.2);
+            border-color: rgba(221, 89, 76, 0.3);
+        }
+        
+        .no-entries {
+            color: var(--text-dim);
+            font-style: italic;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        /* Chart */
+        .chart-container {
+            height: 240px;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .chart {
+            height: 180px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 0 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .chart::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 12%;
+        }
+        
+        .bar {
+            width: 32px;
+            background: linear-gradient(to top, rgba(120, 135, 127, 0.6), rgba(120, 135, 127, 0.8));
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+            position: relative;
+            box-shadow: 0 0 15px rgba(120, 135, 127, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -24px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        .bar-label {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+        
+        /* Summary */
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .summary-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .summary-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 400;
+            color: var(--text-light);
+        }
+        
+        .highest-day {
+            font-size: 0.85rem;
+            margin-top: 6px;
+            color: var(--accent);
+        }
+        
+        /* Safety info */
+        .safety-info {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            border: 1px solid var(--glass-border);
+            letter-spacing: 0.3px;
+            line-height: 1.6;
+        }
+        
+        .safety-status {
+            margin-top: 10px;
+            font-weight: 400;
+        }
+        
+        /* Actions */
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .clear-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+        }
+        
+        .clear-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .save-btn {
+            background: rgba(120, 135, 127, 0.4);
+            color: var(--text-light);
+            border-color: rgba(120, 135, 127, 0.5);
+        }
+        
+        .save-btn:hover {
+            background: rgba(120, 135, 127, 0.5);
+            border-color: rgba(120, 135, 127, 0.6);
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(54, 60, 57, 0.85);
+            color: var(--text-light);
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .day-label {
+                margin-bottom: 6px;
+            }
+            
+            .type-input, .caffeine-input {
+                width: 100%;
+            }
+            
+            .summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .glass-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="glass-card">
+            <div class="logo">
+                <span class="logo-icon">☕</span>
+                <span class="logo-text">Coffee Tracker</span>
+            </div>
+            
+            <div class="presets">
+                <button class="preset-btn" onclick="addPreset('Espresso', 63)">Espresso (63mg)</button>
+                <button class="preset-btn" onclick="addPreset('Americano', 77)">Americano (77mg)</button>
+                <button class="preset-btn" onclick="addPreset('Drip Coffee', 95)">Drip (95mg)</button>
+                <button class="preset-btn" onclick="addPreset('Latte', 77)">Latte (77mg)</button>
+                <button class="preset-btn" onclick="addPreset('Cappuccino', 63)">Cappuccino (63mg)</button>
+            </div>
+            
+            <h2>Add Coffee</h2>
+            
+            <div class="form-group">
+                <span class="day-label">Monday</span>
+                <input type="text" id="coffeeType_monday" class="type-input" placeholder="Coffee type">
+                <input type="number" id="caffeine_monday" class="caffeine-input" placeholder="mg" min="0" value="0">
+                <button onclick="addEntry('monday')">Add</button>
+            </div>
+            
+            <div class="form-group">
+                <span class="day-label">Tuesday</span>
+                <input type="text" id="coffeeType_tuesday" class="type-input" placeholder="Coffee type">
+                <input type="number" id="caffeine_tuesday" class="caffeine-input" placeholder="mg" min="0" value="0">
+                <button onclick="addEntry('tuesday')">Add</button>
+            </div>
+            
+            <div class="form-group">
+                <span class="day-label">Wednesday</span>
+                <input type="text" id="coffeeType_wednesday" class="type-input" placeholder="Coffee type">
+                <input type="number" id="caffeine_wednesday" class="caffeine-input" placeholder="mg" min="0" value="0">
+                <button onclick="addEntry('wednesday')">Add</button>
+            </div>
+            
+            <div class="form-group">
+                <span class="day-label">Thursday</span>
+                <input type="text" id="coffeeType_thursday" class="type-input" placeholder="Coffee type">
+                <input type="number" id="caffeine_thursday" class="caffeine-input" placeholder="mg" min="0" value="0">
+                <button onclick="addEntry('thursday')">Add</button>
+            </div>
+            
+            <div class="form-group">
+                <span class="day-label">Friday</span>
+                <input type="text" id="coffeeType_friday" class="type-input" placeholder="Coffee type">
+                <input type="number" id="caffeine_friday" class="caffeine-input" placeholder="mg" min="0" value="0">
+                <button onclick="addEntry('friday')">Add</button>
+            </div>
+            
+            <div class="form-group">
+                <span class="day-label">Saturday</span>
+                <input type="text" id="coffeeType_saturday" class="type-input" placeholder="Coffee type">
+                <input type="number" id="caffeine_saturday" class="caffeine-input" placeholder="mg" min="0" value="0">
+                <button onclick="addEntry('saturday')">Add</button>
+            </div>
+            
+            <div class="form-group">
+                <span class="day-label">Sunday</span>
+                <input type="text" id="coffeeType_sunday" class="type-input" placeholder="Coffee type">
+                <input type="number" id="caffeine_sunday" class="caffeine-input" placeholder="mg" min="0" value="0">
+                <button onclick="addEntry('sunday')">Add</button>
+            </div>
+        </div>
+        
+        <div class="glass-card">
+            <h2>Weekly Overview</h2>
+            
+            <div class="chart-container">
+                <div class="chart" id="chart">
+                    <!-- Bars will be added here by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="summary">
+                <div class="summary-item">
+                    <div class="summary-label">TOTAL CAFFEINE</div>
+                    <div class="summary-value" id="totalCaffeine">0</div>
+                    <div>mg</div>
+                </div>
+                
+                <div class="summary-item">
+                    <div class="summary-label">DAILY AVERAGE</div>
+                    <div class="summary-value" id="averageCaffeine">0</div>
+                    <div>mg</div>
+                </div>
+                
+                <div class="summary-item">
+                    <div class="summary-label">HIGHEST INTAKE</div>
+                    <div class="summary-value" id="highestAmount">0</div>
+                    <div class="highest-day" id="highestDay">None</div>
+                </div>
+            </div>
+            
+            <div class="safety-info">
+                <div>Health experts recommend limiting caffeine intake to 400mg per day for most adults.</div>
+                <div class="safety-status" id="safetyStatus">Your daily average is within recommended limits.</div>
+            </div>
+        </div>
+        
+        <div class="glass-card">
+            <h2>This Week's Coffee</h2>
+            
+            <div class="entries" id="entries">
+                <!-- Entries will be added here by JavaScript -->
+                <div class="no-entries">No coffee entries yet. Add some above!</div>
+            </div>
+            
+            <div class="actions">
+                <button class="clear-btn" onclick="clearAllData()">Clear All</button>
+                <button class="save-btn" onclick="saveData()">Save Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure to hold coffee entries
+        let coffeeData = {
+            monday: [],
+            tuesday: [],
+            wednesday: [],
+            thursday: [],
+            friday: [],
+            saturday: [],
+            sunday: []
+        };
+        
+        // Load saved data on page load
+        window.onload = function() {
+            loadData();
+            updateSummary();
+            updateChart();
+        };
+        
+        // Add preset coffee
+        function addPreset(type, caffeine) {
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'lowercase' });
+            document.getElementById(`coffeeType_${today}`).value = type;
+            document.getElementById(`caffeine_${today}`).value = caffeine;
+        }
+        
+        // Add a coffee entry
+        function addEntry(day) {
+            const coffeeType = document.getElementById(`coffeeType_${day}`).value;
+            const caffeine = parseInt(document.getElementById(`caffeine_${day}`).value) || 0;
+            
+            if (coffeeType.trim() === '') {
+                showToast('Please enter a coffee type');
+                return;
+            }
+            
+            coffeeData[day].push({
+                type: coffeeType,
+                caffeine: caffeine
+            });
+            
+            // Clear input fields
+            document.getElementById(`coffeeType_${day}`).value = '';
+            document.getElementById(`caffeine_${day}`).value = 0;
+            
+            // Update display
+            updateEntries();
+            updateSummary();
+            updateChart();
+            saveData(false); // Save without notification
+        }
+        
+        // Update the entries display
+        function updateEntries() {
+            const entriesDiv = document.getElementById('entries');
+            entriesDiv.innerHTML = '';
+            
+            let hasEntries = false;
+            
+            for (const day in coffeeData) {
+                if (coffeeData[day].length > 0) {
+                    hasEntries = true;
+                    const dayEntries = document.createElement('div');
+                    dayEntries.className = 'day-entries';
+                    dayEntries.innerHTML = `<div class="day-title">${day.charAt(0).toUpperCase() + day.slice(1)}</div>`;
+                    
+                    const list = document.createElement('ul');
+                    list.className = 'entry-list';
+                    coffeeData[day].forEach((entry, index) => {
+                        const item = document.createElement('li');
+                        item.className = 'entry-item';
+                        item.innerHTML = `
+                            <span>${entry.type} (${entry.caffeine} mg)</span>
+                            <button class="remove-btn" onclick="removeEntry('${day}', ${index})">Remove</button>
+                        `;
+                        list.appendChild(item);
+                    });
+                    
+                    dayEntries.appendChild(list);
+                    entriesDiv.appendChild(dayEntries);
+                }
+            }
+            
+            if (!hasEntries) {
+                entriesDiv.innerHTML = '<div class="no-entries">No coffee entries yet. Add some above!</div>';
+            }
+        }
+        
+        // Remove an entry
+        function removeEntry(day, index) {
+            coffeeData[day].splice(index, 1);
+            updateEntries();
+            updateSummary();
+            updateChart();
+            saveData(false); // Save without notification
+        }
+        
+        // Update summary calculations
+        function updateSummary() {
+            let totalCaffeine = 0;
+            let daysWithCoffee = 0;
+            let highestDay = null;
+            let highestAmount = 0;
+            
+            for (const day in coffeeData) {
+                let dayTotal = 0;
+                coffeeData[day].forEach(entry => {
+                    dayTotal += entry.caffeine;
+                });
+                
+                totalCaffeine += dayTotal;
+                
+                if (dayTotal > 0) {
+                    daysWithCoffee++;
+                }
+                
+                if (dayTotal > highestAmount) {
+                    highestAmount = dayTotal;
+                    highestDay = day;
+                }
+            }
+            
+            const averageCaffeine = daysWithCoffee > 0 ? Math.round(totalCaffeine / daysWithCoffee) : 0;
+            
+            document.getElementById('totalCaffeine').textContent = totalCaffeine;
+            document.getElementById('averageCaffeine').textContent = averageCaffeine;
+            
+            if (highestDay) {
+                document.getElementById('highestDay').textContent = highestDay.charAt(0).toUpperCase() + highestDay.slice(1);
+                document.getElementById('highestAmount').textContent = highestAmount;
+            } else {
+                document.getElementById('highestDay').textContent = 'None';
+                document.getElementById('highestAmount').textContent = '0';
+            }
+            
+            // Update safety status
+            const safetyStatus = document.getElementById('safetyStatus');
+            if (averageCaffeine > 400) {
+                safetyStatus.textContent = 'Your daily average exceeds recommended limits (400mg).';
+                safetyStatus.style.color = 'rgba(255, 160, 160, 0.9)';
+            } else {
+                safetyStatus.textContent = 'Your daily average is within recommended limits.';
+                safetyStatus.style.color = 'rgba(160, 255, 160, 0.9)';
+            }
+        }
+        
+        // Update chart visualization
+        function updateChart() {
+            const chart = document.getElementById('chart');
+            chart.innerHTML = '';
+            
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            
+            let maxCaffeine = 0;
+            
+            // Find the maximum daily caffeine for scaling
+            days.forEach(day => {
+                let dayTotal = coffeeData[day].reduce((sum, entry) => sum + entry.caffeine, 0);
+                if (dayTotal > maxCaffeine) {
+                    maxCaffeine = dayTotal;
+                }
+            });
+            
+            // Create a minimum scale if all values are low
+            maxCaffeine = Math.max(maxCaffeine, 100);
+            
+            // Create bars for each day
+            days.forEach((day, index) => {
+                const dayTotal = coffeeData[day].reduce((sum, entry) => sum + entry.caffeine, 0);
+                const height = dayTotal > 0 ? (dayTotal / maxCaffeine) * 160 : 0; // Scale to max height of 160px
+                
+                const barContainer = document.createElement('div');
+                barContainer.className = 'bar-container';
+                
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${height}px`;
+                
+                // Add value on top of bar
+                if (dayTotal > 0) {
+                    const value = document.createElement('div');
+                    value.className = 'bar-value';
+                    value.textContent = dayTotal;
+                    bar.appendChild(value);
+                }
+                
+                barContainer.appendChild(bar);
+                
+                // Add day label
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = dayLabels[index];
+                barContainer.appendChild(label);
+                
+                chart.appendChild(barContainer);
+            });
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            // Remove any existing toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => {
+                document.body.removeChild(toast);
+            });
+            
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            if (type === 'success') {
+                toast.style.borderLeft = '3px solid rgba(160, 255, 160, 0.7)';
+            } else if (type === 'error') {
+                toast.style.borderLeft = '3px solid rgba(255, 160, 160, 0.7)';
+            }
+            
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            
+            // Fade out and remove after delay
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        document.body.removeChild(toast);
+                    }
+                }, 500);
+            }, 2500);
+        }
+        
+        // Save data to local storage
+        function saveData(showNotification = true) {
+            localStorage.setItem('coffeeTrackerData', JSON.stringify(coffeeData));
+            
+            if (showNotification) {
+                showToast('Data saved successfully!', 'success');
+            }
+        }
+        
+        // Load data from local storage
+        function loadData() {
+            const savedData = localStorage.getItem('coffeeTrackerData');
+            if (savedData) {
+                coffeeData = JSON.parse(savedData);
+                updateEntries();
+            }
+        }
+        
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                coffeeData = {
+                    monday: [],
+                    tuesday: [],
+                    wednesday: [],
+                    thursday: [],
+                    friday: [],
+                    saturday: [],
+                    sunday: []
+                };
+                
+                updateEntries();
+                updateSummary();
+                updateChart();
+                localStorage.removeItem('coffeeTrackerData');
+                
+                showToast('All data cleared!', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
